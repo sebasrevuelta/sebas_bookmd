@@ -1,0 +1,9 @@
+Flask==0.12  # Vulnerable to directory traversal
+requests==2.19.1  # Vulnerable to open redirect (CVE-2018-18074)
+urllib3==1.24.1  # Vulnerable to DoS (CVE-2019-11324)
+django==1.11.20  # Vulnerable to SQL injection (CVE-2019-14234)
+jinja2==2.10  # Vulnerable to sandbox escape attacks (CVE-2019-10906)
+cryptography==2.1.4  # Memory leak vulnerability (CVE-2018-10903)
+pillow==6.2.0  # Multiple buffer overflow vulnerabilities (CVE-2019-16865)
+PyYAML==3.13  # Arbitrary code execution during deserialization (CVE-2017-18342)
+SQLAlchemy==1.2.17  # SQL injection vulnerability (CVE-2019-7548)

@@ -1,0 +1,40 @@
+requests@2.19.1:
+  version "2.19.1"
+  resolved "https://registry.yarnpkg.com/requests/-/requests-2.19.1.tgz"
+  integrity sha512-abc123...
+  dependencies:
+    urllib3 "^1.24.1"
+
+urllib3@1.24.1:
+  version "1.24.1"
+  resolved "https://registry.yarnpkg.com/urllib3/-/urllib3-1.24.1.tgz"
+  integrity sha512-def456...
+  dependencies:
+    idna "^2.7"
+
+idna@2.7:
+  version "2.7"
+  resolved "https://registry.yarnpkg.com/idna/-/idna-2.7.tgz"
+  integrity sha512-xyz789...
+
+lodash@4.17.11:
+  version "4.17.11"
+  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.11.tgz"
+  integrity sha512-ghi789...
+
+serialize-javascript@2.1.1:
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/serialize-javascript/-/serialize-javascript-2.1.1.tgz"
+  integrity sha512-jkl012...
+
+event-stream@3.3.6:
+  version "3.3.6"
+  resolved "https://registry.yarnpkg.com/event-stream/-/event-stream-3.3.6.tgz"
+  integrity sha512-mno345...
+  dependencies:
+    flatmap-stream "0.1.1"
+
+flatmap-stream@0.1.1:
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/flatmap-stream/-/flatmap-stream-0.1.1.tgz"
+  integrity sha512-pqr678...
