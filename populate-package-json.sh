@@ -1,4 +1,8 @@
-{
+#!/bin/bash
+
+
+# Example content for package-lock.json
+package_lock_content='{
   "name": "react-tutorial",
   "version": "1.0.0",
   "lockfileVersion": 1,
@@ -15664,4 +15668,14 @@
       }
     }
   }
-}
+}'
+
+# Populate package-lock.json files
+find . -name "package-lock.json" | while read -r file; do
+  echo "Populating $file with example content for package-lock.json..."
+  echo "$package_lock_content" > "$file"
+done
+
+
+echo "All requirements.txt and yarn.lock files have been populated!"
+
