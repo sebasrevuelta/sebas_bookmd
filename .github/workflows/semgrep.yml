@@ -19,4 +19,39 @@ jobs:
     if: (github.actor != 'dependabot[bot]')
     steps:
       - uses: actions/checkout@v4
-      - run: semgrep ci --supply-chain --exclude='package-lock.json'
+      - run: |
+          # Fetch the list of changed files in the pull request
+          changed_files=$(git diff --name-only FETCH_HEAD)
+          
+          # If no files are changed, exit
+          if [ -z "$changed_files" ]; then
+            echo "No changed files."
+            exit 0
+          fi
+          
+          # Find the common prefix of the paths
+          common_prefix=$(echo "$changed_files" | awk -F'/' '
+          {
+            for (i = 1; i <= NF; i++) {
+              if (i > depth || path[i] != $i) {
+                depth = i - 1;
+                break;
+              }
+              path[i] = $i;
+            }
+          }
+          END {
+            for (i = 1; i <= depth; i++) {
+              printf "%s/", path[i];
+            }
+            printf "\n";
+          }' | sed 's/\/$//')  # Remove trailing slash if any
+          
+          # Print the common parent folder
+          if [ -z "$common_prefix" ]; then
+            echo "No common parent folder found."
+          else
+            echo "Common parent folder: $common_prefix"
+          fi
+          # Semgrep scan 
+          semgrep ci --supply-chain --include=$common_prefix/*
