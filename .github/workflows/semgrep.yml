@@ -21,7 +21,7 @@ jobs:
       - uses: actions/checkout@v4
       - run: |
           # Get the list of changed files from git
-          changed_files=$(git diff --name-only FETCH_HEAD)
+          changed_files=$(git diff --no-index --name-only FETCH_HEAD)
           
           # Check if there are any files
           if [ -z "$changed_files" ]; then
