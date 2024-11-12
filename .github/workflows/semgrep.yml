@@ -11,12 +11,14 @@ on:
 jobs:
   find-common-parent:
     runs-on: ubuntu-latest
-
+    outputs:
+      common_prefix: ${{ steps.find-common.outputs.common_prefix }}
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
     - name: Find common parent directory
+      id: find-common
       run: |
         # Fetch the changed files from the last commit
         changed_files=$(git diff --name-only FETCH_HEAD)
@@ -24,6 +26,7 @@ jobs:
         # Check if there are any files
         if [ -z "$changed_files" ]; then
             echo "Common directory: ."
+            echo "::set-output name=common_prefix::."
             exit 0
         fi
 
@@ -34,6 +37,7 @@ jobs:
         if [ ${#files[@]} -eq 1 ]; then
             parent_dir=$(dirname "${files[0]}")
             echo "Common directory: $parent_dir"
+            echo "::set-output name=common_prefix::$parent_dir"
             exit 0
         fi
 
@@ -45,6 +49,7 @@ jobs:
                 # If we reach the root directory, return "."
                 if [[ "$common_prefix" == "." || "$common_prefix" == "/" ]]; then
                     echo "Common directory: ."
+                    echo "::set-output name=common_prefix::."
                     exit 0
                 fi
             done
@@ -52,7 +57,8 @@ jobs:
 
         # Print and export the final common directory
         echo "Common directory: $common_prefix"
-        echo "common_prefix=$common_prefix" >> $GITHUB_ENV
+        echo "::set-output name=common_prefix::$common_prefix"
+
 
   semgrep:
     needs: find-common-parent
@@ -65,4 +71,5 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - run: |
-        semgrep ci --supply-chain --subdir='$common_prefix'
+        echo '${{ needs.find-common-parent.outputs.common_prefix }}'
+        semgrep ci --supply-chain --subdir='${{ needs.find-common-parent.outputs.common_prefix }}'
