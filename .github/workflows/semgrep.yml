@@ -14,7 +14,7 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Find common parent directory
       run: |
@@ -63,7 +63,6 @@ jobs:
     container:
       image: semgrep/semgrep
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - run: |
-        semgrep ci --supply-chain
         semgrep ci --supply-chain --subdir='$common_prefix'
