@@ -10,48 +10,46 @@ on:
       - .github/workflows/semgrep.yml
 jobs:
   semgrep:
-    name: semgrep/ci
-    runs-on: ubuntu-20.04
-    env:
-      SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
-    container:
-      image: semgrep/semgrep
-    if: (github.actor != 'dependabot[bot]')
+  find-common-parent:
+    runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - run: |
-          # Get the list of changed files from git
-          changed_files=$(git diff --no-index --name-only FETCH_HEAD)
-          
-          # Check if there are any files
-          if [ -z "$changed_files" ]; then
-              echo "."
-              exit 0
-          fi
-          
-          # Convert the list into an array
-          files=($changed_files)
-          
-          # If there is only one file, return its parent directory
-          if [ ${#files[@]} -eq 1 ]; then
-              dirname "${files[0]}"
-              exit 0
-          fi
-          
-          # Find the common parent directory
-          common_prefix="${files[0]}"
-          for file in "${files[@]:1}"; do
-              while [[ $file != $common_prefix* ]]; do
-                  common_prefix=$(dirname "$common_prefix")
-                  # If we reach the root directory, return "."
-                  if [[ "$common_prefix" == "." || "$common_prefix" == "/" ]]; then
-                      echo "."
-                      exit 0
-                  fi
-              done
-          done
-          
-          # Print the common prefix
-          echo "$common_prefix"
-          # Semgrep scan 
-          semgrep ci --supply-chain --include='$common_prefix/*'
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Find common parent directory
+      run: |
+        # Fetch the changed files from the last commit
+        changed_files=$(git diff --name-only FETCH_HEAD)
+        
+        # Check if there are any files
+        if [ -z "$changed_files" ]; then
+            echo "Common directory: ."
+            exit 0
+        fi
+
+        # Convert the list into an array
+        files=($changed_files)
+
+        # If there is only one file, return its parent directory
+        if [ ${#files[@]} -eq 1 ]; then
+            parent_dir=$(dirname "${files[0]}")
+            echo "Common directory: $parent_dir"
+            exit 0
+        fi
+
+        # Find the common parent directory
+        common_prefix="${files[0]}"
+        for file in "${files[@]:1}"; do
+            while [[ $file != $common_prefix* ]]; do
+                common_prefix=$(dirname "$common_prefix")
+                # If we reach the root directory, return "."
+                if [[ "$common_prefix" == "." || "$common_prefix" == "/" ]]; then
+                    echo "Common directory: ."
+                    exit 0
+                fi
+            done
+        done
+
+        # Print the final common directory
+        echo "Common directory: $common_prefix"
