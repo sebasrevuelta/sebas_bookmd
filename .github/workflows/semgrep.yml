@@ -56,9 +56,12 @@ jobs:
 
     - name: Run Semgrep
       uses: addnab/docker-run-action@v3
+      env:
+        SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
       with:
         image: semgrep/semgrep
         run: |
             echo "$common_prefix"
+            pwd
             semgrep ci --supply-chain
             semgrep ci --supply-chain --subdir="$common_prefix"
