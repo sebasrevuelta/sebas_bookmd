@@ -20,7 +20,7 @@ jobs:
       run: |
         # Fetch the changed files from the last commit
         changed_files=$(git diff --name-only FETCH_HEAD)
-        
+        echo "$changed_files"
         # Check if there are any files
         if [ -z "$changed_files" ]; then
             echo "Common directory: ."
@@ -50,5 +50,12 @@ jobs:
             done
         done
 
-        # Print the final common directory
+        # Print and export the final common directory
         echo "Common directory: $common_prefix"
+        echo "common_prefix=$common_prefix" >> $GITHUB_ENV
+
+    - name: Run Semgrep
+      uses: addnab/docker-run-action@v3
+      with:
+        image: semgrep/semgrep
+        run: semgrep ci --supply-chain --include="$common_prefix/*"
