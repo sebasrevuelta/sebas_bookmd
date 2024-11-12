@@ -54,14 +54,16 @@ jobs:
         echo "Common directory: $common_prefix"
         echo "common_prefix=$common_prefix" >> $GITHUB_ENV
 
-    - name: Run Semgrep
-      uses: addnab/docker-run-action@v3
-      env:
-        SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
-      with:
-        image: semgrep/semgrep
-        run: |
-            echo "$common_prefix"
-            pwd
-            semgrep ci --supply-chain
-            semgrep ci --supply-chain --subdir="$common_prefix"
+  semgrep:
+    needs: find-common-parent
+    name: semgrep
+    runs-on: ubuntu-20.04
+    env:
+      SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
+    container:
+      image: semgrep/semgrep
+    steps:
+    - uses: actions/checkout@v3
+    - run: |
+        semgrep ci --supply-chain
+        semgrep ci --supply-chain --subdir='$common_prefix'
