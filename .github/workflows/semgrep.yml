@@ -20,8 +20,12 @@ jobs:
     - name: Find common parent directory
       id: find-common
       run: |
+        echo "Fetching list of changed files..."
+        changed_files=$(gh pr diff ${{ github.event.pull_request.number }} --name-only)
+        echo "Changed files:"
+        #echo "$CHANGED_FILES"
         # Fetch the changed files from the last commit
-        changed_files=$(git diff --name-only FETCH_HEAD)
+        #changed_files=$(git diff --name-only FETCH_HEAD)
         echo "$changed_files"
         # Check if there are any files
         if [ -z "$changed_files" ]; then
