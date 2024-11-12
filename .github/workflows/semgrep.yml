@@ -65,4 +65,5 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - run: |
+        echo "$common_prefix"
         semgrep ci --supply-chain --subdir='$common_prefix'
