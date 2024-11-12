@@ -11,6 +11,8 @@ on:
 jobs:
   find-common-parent:
     runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}
     outputs:
       common_prefix: ${{ steps.find-common.outputs.common_prefix }}
     steps:
