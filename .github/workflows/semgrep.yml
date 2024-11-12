@@ -58,4 +58,7 @@ jobs:
       uses: addnab/docker-run-action@v3
       with:
         image: semgrep/semgrep
-        run: semgrep ci --supply-chain --include="$common_prefix/*"
+        run: |
+            echo "$common_prefix"
+            semgrep ci --supply-chain
+            semgrep ci --supply-chain --subdir="$common_prefix"
