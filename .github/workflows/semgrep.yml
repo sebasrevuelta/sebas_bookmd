@@ -1,81 +1,47 @@
+# Name of this GitHub Actions workflow.
 name: Semgrep
+
 on:
-  workflow_dispatch: {}
+  # Scan changed files in PRs (diff-aware scanning):
   pull_request: {}
+  # Scan on-demand through GitHub Actions interface:
+  workflow_dispatch: {}
+  # Scan mainline branches if there are changes to .github/workflows/semgrep.yml:
   push:
     branches:
       - main
       - master
     paths:
       - .github/workflows/semgrep.yml
+  # Schedule the CI job (this method uses cron syntax):
+  schedule:
+    - cron: '20 17 * * *' # Sets Semgrep to scan every day at 17:20 UTC.
+    # It is recommended to change the schedule to a random time.
+
+permissions:
+  contents: read
+
 jobs:
-  find-common-parent:
-    runs-on: ubuntu-latest
-    env:
-      GH_TOKEN: ${{ secrets.GH_TOKEN }}
-    outputs:
-      common_prefix: ${{ steps.find-common.outputs.common_prefix }}
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Find common parent directory
-      id: find-common
-      run: |
-        echo "Fetching list of changed files..."
-        changed_files=$(gh pr diff ${{ github.event.pull_request.number }} --name-only)
-        echo "Changed files:"
-        #echo "$CHANGED_FILES"
-        # Fetch the changed files from the last commit
-        #changed_files=$(git diff --name-only FETCH_HEAD)
-        echo "$changed_files"
-        # Check if there are any files
-        if [ -z "$changed_files" ]; then
-            echo "Common directory: ."
-            echo "::set-output name=common_prefix::."
-            exit 0
-        fi
-
-        # Convert the list into an array
-        files=($changed_files)
-
-        # If there is only one file, return its parent directory
-        if [ ${#files[@]} -eq 1 ]; then
-            parent_dir=$(dirname "${files[0]}")
-            echo "Common directory: $parent_dir"
-            echo "::set-output name=common_prefix::$parent_dir"
-            exit 0
-        fi
-
-        # Find the common parent directory
-        common_prefix="${files[0]}"
-        for file in "${files[@]:1}"; do
-            while [[ $file != $common_prefix* ]]; do
-                common_prefix=$(dirname "$common_prefix")
-                # If we reach the root directory, return "."
-                if [[ "$common_prefix" == "." || "$common_prefix" == "/" ]]; then
-                    echo "Common directory: ."
-                    echo "::set-output name=common_prefix::."
-                    exit 0
-                fi
-            done
-        done
-
-        # Print and export the final common directory
-        echo "Common directory: $common_prefix"
-        echo "::set-output name=common_prefix::$common_prefix"
-
-
   semgrep:
-    needs: find-common-parent
-    name: semgrep
-    runs-on: ubuntu-20.04
-    env:
-      SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
+    # User definable name of this GitHub Actions job.
+    name: semgrep/ci
+    # If you are self-hosting, change the following `runs-on` value:
+    runs-on: ubuntu-latest
+
     container:
+      # A Docker image with Semgrep installed. Do not change this.
       image: semgrep/semgrep
+
+    # Skip any PR created by dependabot to avoid permission issues:
+    if: (github.actor != 'dependabot[bot]')
+
     steps:
-    - uses: actions/checkout@v4
-    - run: |
-        echo '${{ needs.find-common-parent.outputs.common_prefix }}'
-        semgrep ci
+      # Fetch project source with GitHub Actions Checkout. Use either v3 or v4.
+      - uses: actions/checkout@v4
+      # Run the "semgrep ci" command on the command line of the docker image.
+      - run: semgrep ci
+        env:
+          # Connect to Semgrep AppSec Platform through your SEMGREP_APP_TOKEN.
+          # Generate a token from Semgrep AppSec Platform > Settings
+          # and add it to your GitHub secrets.
+          SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
